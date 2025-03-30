@@ -1,0 +1,13 @@
+{
+  "name": "CVMClient",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "repository": "https://github.com/befaci03/CVMClient",
+  "author": "Befaci",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "electron": "^35.1.2",
+    "electron-builder": "^26.0.12"
+  }
+}
