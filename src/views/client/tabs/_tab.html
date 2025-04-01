@@ -7,17 +7,14 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const webview = document.getElementById('webapp');
+            const webview = document.querySelector('iframe');
             
-            // Ajout des événements de debug et gestion webview
             webview.addEventListener('did-fail-load', (e) => {
                 console.error('Webview failed to load:', e);
             });
             
             webview.addEventListener('dom-ready', () => {
                 console.log('Webview DOM ready');
-                // Ouvrir les dev tools du webview pour debug si nécessaire
-                // webview.openDevTools();
             });
 
             const type = new URLSearchParams(window.location.search).get('srvtype');
@@ -69,8 +66,7 @@
                                 }
 
                                 webview.setAttribute('src', url);
-                                webview.setAttribute('allowpopups', 'true');
-                                webview.setAttribute('useragent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
+                                webview.contentWindow.location.href = url;
                                 console.log("Webview configured successfully");
                             } catch (error) {
                                 console.error("Error setting up webview:", error);
@@ -90,14 +86,11 @@
             });
     </script>
 </head>
-<body>
+<body style="overflow: hidden; margin: 0; padding: 0;">
     <main>
-        <webview 
+        <iframe 
             id="webapp" 
-            style="width:100%; height:100%; border:none;" 
-            src="about:blank"
-            allowpopups
-            autosize="on"></webview>
+            style="width: 100vw; height: 100vh; border: none; flex: 1; margin: 0; padding: 0;"></iframe>
     </main>
 </body>
 </html>

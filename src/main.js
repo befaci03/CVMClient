@@ -22,6 +22,19 @@ function createMainWIN() {
 
 app.whenReady().then(() => {
     createMainWIN();
+
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        if (details.responseHeaders['X-Frame-Options']) { // bypass x-frame to have the possibility to enter collabvm
+            delete details.responseHeaders['X-Frame-Options'];
+        }
+        if (details.responseHeaders['Content-Security-Policy']) {
+            delete details.responseHeaders['Content-Security-Policy'];
+        }
+        callback({ 
+            cancel: false, 
+            responseHeaders: details.responseHeaders 
+        });
+    });
 });
 
 ipcMain.on('windowapi-minimize', async () => {
