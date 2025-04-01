@@ -5,9 +5,17 @@
   "repository": "https://github.com/befaci03/CVMClient",
   "author": "Befaci",
   "license": "MIT",
+  "scripts": {
+    "start": "electron ./src/main.js"
+  },
   "private": false,
   "devDependencies": {
     "electron": "^35.1.2",
     "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "discord-rpc": "^4.0.1",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
   }
 }

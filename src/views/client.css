@@ -1,0 +1,60 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+#titlebar {
+    -webkit-app-region: drag;
+    background: #222;
+    color: white;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    user-select: none;
+}
+
+#windowtitle {
+    flex-grow: 1;
+    font-size: 14px;
+}
+
+.btnscontainer_titlebar {
+    display: flex;
+    gap: 10px;
+    -webkit-app-region: no-drag; /* Désactive le drag ici */
+}
+
+.btnscontainer_titlebar span {
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 16px;
+    -webkit-app-region: no-drag; /* Désactive aussi sur les boutons */
+}
+
+.btnscontainer_titlebar span:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+#winclose:hover {
+    background: red;
+    color: white;
+    border-radius: 3px;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 32px); /* Enlève la hauteur de la titlebar */
+    overflow: hidden;
+}
+
+iframe {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+}

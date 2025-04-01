@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tab</title>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const webview = document.getElementById('webapp');
+            
+            // Ajout des événements de debug et gestion webview
+            webview.addEventListener('did-fail-load', (e) => {
+                console.error('Webview failed to load:', e);
+            });
+            
+            webview.addEventListener('dom-ready', () => {
+                console.log('Webview DOM ready');
+                // Ouvrir les dev tools du webview pour debug si nécessaire
+                // webview.openDevTools();
+            });
+
+            const type = new URLSearchParams(window.location.search).get('srvtype');
+            let uri = new URLSearchParams(window.location.search).get('srvuri');
+
+            if (!type || !uri) {
+                window.location.href = "newtab.html?ERR=Missing%20parameters!";
+                return;
+            }
+
+            if (uri.endsWith('/')) {
+                uri = uri.slice(0, -1);
+            }
+
+            let url;
+            if (type === "ws") url = "ws://" + uri;
+            else if (type === "wss") url = "wss://" + uri;
+            else if (type === "http") url = "http://" + uri;
+            else if (type === "https") url = "https://" + uri;
+            else {
+                window.location.href = "newtab.html?ERR=Invalid%20type!";
+                return;
+            }
+
+            fetch('https://raw.githubusercontent.com/befaci03/befaci03.github.io/refs/heads/me/assets/_db/cvmclient_.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch whitelist");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const whitelist = data.wl;
+                    
+                    const isAllowed = whitelist.some(whitelistedUrl => {
+                        if (url === whitelistedUrl) return true;
+                        if (url.startsWith(whitelistedUrl)) return true;
+                        
+                        return false;
+                    });
+
+                    if (isAllowed) {
+                        if (url.startsWith("http")) {
+                            try {
+                                console.log("Setting up webview for URL:", url);
+                                
+                                if (!webview) {
+                                    throw new Error("Webview element not found!");
+                                }
+
+                                webview.setAttribute('src', url);
+                                webview.setAttribute('allowpopups', 'true');
+                                webview.setAttribute('useragent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
+                                console.log("Webview configured successfully");
+                            } catch (error) {
+                                console.error("Error setting up webview:", error);
+                                window.location.href = "newtab.html?ERR=Internal%20client%20error:%20" + error.message;
+                            }
+                        } else {
+                            document.body.innerHTML = "false feature!";
+                        }
+                    } else {
+                        window.location.href = "newtab.html?ERR=Invalid%20URL%3A%20Not%20in%20the%20whitelist!";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching whitelist:", error);
+                    window.location.href = "newtab.html?ERR=Error%20loading%20whitelist!";
+                });
+            });
+    </script>
+</head>
+<body>
+    <main>
+        <webview 
+            id="webapp" 
+            style="width:100%; height:100%; border:none;" 
+            src="about:blank"
+            allowpopups
+            autosize="on"></webview>
+    </main>
+</body>
+</html>

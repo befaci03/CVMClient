@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tab</title>
+    <style>
+        body {
+            background: linear-gradient(145deg, #121212, #1e1e1e, #0e509c, #5a00b5, #ff0080, #121212, #1e1e1e, #0e509c, #5a00b5);
+            background-size: 450% 450%;
+            color: #ffffff;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            margin: 0;
+            padding: 0;
+            animation: gradientShift 15s infinite linear, backgroundPulse 4s infinite ease-in-out;
+            overflow: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 20% 20%; }
+            50% { background-position: 40% 40%; }
+            75% { background-position: 60% 60%; }
+            100% { background-position: 80.5% 80.5%; }
+        }
+        @keyframes backgroundPulse {
+            0%, 100% { filter: brightness(0.95); }
+            50% { filter: brightness(1.2); }
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            animation: fadeIn 2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            animation: slideIn 1s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        input[type="url"], input[type="submit"] {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        input[type="url"]:focus, input[type="submit"]:hover {
+            border-color: #0f61c0;
+            outline: none;
+            transform: scale(1.05);
+        }
+
+        input[type="url"] {
+            width: 90%;
+            max-width: 650px;
+            min-width: 275px;
+        }
+        input[type="submit"] {
+            cursor: pointer;
+        }
+
+        .popup {
+            position: fixed;
+            top: 8%;
+            right: 5%;
+            width: 1vw;
+            min-width: 200px;
+            max-width: 850px;
+            background-color: #ff4d4d;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            transform: translate(100%, -50%);
+            opacity: 0;
+        }
+        .error_popupStyle {
+            transform: translate(0, -50%);
+            opacity: 1;
+        }
+        .popup.hide {
+            transform: translate(100%, -50%);
+            opacity: 0;
+        }
+        .popup svg {
+            width: min(20px, 15%);
+            height: auto;
+            fill: #ffebeb;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sm = document.getElementById('connectsrv');
+            const srv = document.getElementById('connectPoint');
+
+            sm.addEventListener('click', () => {
+                const inputUrl = srv.value;
+                let srvtype;
+                
+                // Détection du protocole
+                if (inputUrl.startsWith('https://')) srvtype = 'https';
+                else if (inputUrl.startsWith('http://')) srvtype = 'http';
+                else if (inputUrl.startsWith('wss://')) srvtype = 'wss';
+                else if (inputUrl.startsWith('ws://')) srvtype = 'ws';
+                else srvtype = 'https'; // Par défaut
+
+                // Enlever le protocole de l'URL
+                const srvuri = inputUrl.replace(/^(https?:\/\/|wss?:\/\/)/, '');
+
+                const t = `_tab.html?srvtype=${srvtype}&srvuri=${srvuri}`;
+                window.location.href = t;
+            });
+
+            const e = new URLSearchParams(window.location.search).get('ERR');
+
+            if (e) {
+                const pup = document.querySelector('.popup');
+                if (!pup) return; // Vérification de sécurité
+
+                pup.classList.add('error_popupStyle');
+
+                const erricon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                erricon.setAttribute('viewBox', '0 0 24 24');
+                erricon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8-8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>';
+                
+                const msg = document.createElement('span');
+                msg.textContent = e;
+                
+                pup.innerHTML = ''; // Nettoyer le popup
+                pup.appendChild(erricon);
+                pup.appendChild(msg);
+
+                setTimeout(() => {
+                    pup.classList.add('hide');
+                    setTimeout(() => {
+                        pup.innerHTML = '';
+                        pup.classList.remove('error_popupStyle', 'hide');
+                    }, 500);
+                }, 3000);
+            }
+        });
+    </script>
+</head>
+<body>
+    <main>
+        <h2>Connect to a CollabVM webapp<!--, a CVM client server or a WebSocket--></h2>
+        <input type="url" name="URL of the server" id="connectPoint">
+        <input type="submit" value="Connect" id="connectsrv">
+        <div class="popup"></div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Styles pour les onglets */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        nav {
+            background-color: #1e1e1e;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.375rem 0rem;
+            border-bottom: 1px solid #333;
+            overflow: hidden;
+        }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-grow: 1;
+            overflow-x: auto;
+            scrollbar-width: none; /* Masquer la scrollbar */
+        }
+        .tabs::-webkit-scrollbar {
+            display: none; /* Masquer la scrollbar */
+        }
+        .tab {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            border-radius: 5px 5px 0 0;
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+            flex-shrink: 1;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .tab span {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: calc(100% - 1.5rem); /* Réserver de l'espace pour le bouton fermer */
+        }
+        .tab button {
+            flex-shrink: 0;
+            margin-left: 0.5rem;
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .tab button:hover {
+            color: #ff0000;
+        }
+        .tab.active {
+            background-color: #3c3c3c;
+            font-weight: bold;
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .tab-content {
+            flex-grow: 1;
+            display: none;
+            height: 100%;
+            animation: fadeIn 0.5s ease-in-out, slideDown 0.5s ease-in-out;
+        }
+        .tab-content.active {
+            display: flex;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #ffffff; /* Arrière-plan blanc par défaut */
+        }
+        button.create-tab {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            font-size: 1.4rem;
+            cursor: pointer;
+            margin-bottom: 0.3rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button.create-tab:hover {
+            background-color: #3c3c3c;
+            transform: scale(1.1);
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-10px);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        .button-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            padding-left: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+        .button-container button {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .button-container button:hover {
+            background-color: #3c3c3c;
+            transform: scale(1.05);
+        }
+        .zoom-menu {
+            display: none;
+            flex-direction: column;
+            gap: 0.3rem;
+            background-color: #2c2c2c;
+            padding: 0.5rem;
+            border-radius: 5px;
+            position: absolute;
+            top: 3rem;
+            left: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .zoom-menu button {
+            width: 100%;
+        }
+        .zoom-menu.show {
+            display: flex;
+        }
+        .username-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 1001;
+            animation: spaceFadeInScale 0.7s cubic-bezier(0.075, 0.82, 0.165, 1), undial 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .username-dialog input {
+            padding: 0.5rem;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+        .username-dialog button {
+            background-color: #3c3c3c;
+            color: #e0e0e0;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .username-dialog button:hover {
+            background-color: #4c4c4c;
+        }
+        span.separation {
+            display: inline-block;
+            color: #565656;
+            font-family: sans-serif;
+            user-select: none;
+        }
+        span.separation#tabsplit1 {
+            margin: 0rem 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+        @keyframes spaceFadeInScale {
+            0% {
+                opacity: 0;
+                scale: 0.34;
+            }
+            100% {
+                opacity: 0.95;
+                scale: 1;
+            }
+        }
+        @keyframes undial {
+            0% {
+                transform: translate(0%, 0%);
+            }
+            75% {
+                transform: translate(-75%, -75%);
+            }
+            100% {
+                transform: translate(-50%, -50%);
+            }
+        }
+    </style>
+    <script>
+        const MAX_TABS = 10;
+        let currentZoom = 1;
+
+        function switchTab(event, tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function createTab(url) {
+            const tabsContainer = document.querySelector('.tabs');
+            const contentsContainer = document.querySelector('main');
+
+            if (tabsContainer.children.length >= MAX_TABS) {
+                alert('Tabs limit reach');
+                return;
+            }
+
+            const tabId = `tab${Date.now()}`;
+            const newTab = document.createElement('div');
+            newTab.className = 'tab';
+            newTab.innerHTML = `
+                <span onclick="switchTab(event, '${tabId}')">New Tab</span>
+                <button onclick="closeTab('${tabId}')">x</button>
+            `;
+            tabsContainer.appendChild(newTab);
+
+            const newContent = document.createElement('div');
+            newContent.id = tabId;
+            newContent.className = 'tab-content';
+            newContent.innerHTML = `<iframe src="${url}" frameborder="0" onload="updateTabTitle(this, '${tabId}')"></iframe>`;
+            contentsContainer.appendChild(newContent);
+
+            const iframe = newContent.querySelector('iframe');
+            iframe.addEventListener('load', () => {
+                updateTabTitle(iframe, tabId);
+            });
+
+            switchTab({ currentTarget: newTab.querySelector('span') }, tabId);
+        }
+
+        function closeTab(tabId) {
+            const tab = document.querySelector(`.tab span[onclick*="${tabId}"]`).parentElement;
+            const content = document.getElementById(tabId);
+
+            tab.remove();
+            content.remove();
+
+            const firstTab = document.querySelector('.tab span');
+            if (firstTab) {
+                switchTab({ currentTarget: firstTab }, firstTab.getAttribute('onclick').match(/'(.*?)'/)[1]);
+            }
+        }
+
+        function updateTabTitle(iframe, tabId) {
+            const tab = document.querySelector(`.tab span[onclick*="${tabId}"]`);
+            const title = iframe.contentDocument.head.title || iframe.src.split('/').pop() || 'Tab';
+            tab.textContent = title.length > 10 ? title.slice(0, 15) + '..' : title;
+        }
+
+        function refreshActiveTab() {
+            const activeIframe = document.querySelector('.tab-content.active iframe');
+            if (activeIframe) {
+                activeIframe.contentWindow.location.reload();
+            } else {
+                alert('No active tab to refresh!');
+            }
+        }
+
+        function toggleZoomMenu() {
+            const zoomMenu = document.querySelector('.zoom-menu');
+            zoomMenu.classList.toggle('show');
+        }
+
+        function setZoom(zoomLevel) {
+            currentZoom = zoomLevel;
+            document.querySelectorAll('iframe').forEach(iframe => {
+                iframe.style.transform = `scale(${currentZoom})`;
+            });
+            toggleZoomMenu();
+        }
+
+        function showUsernameDialog() {
+            document.querySelector('.username-dialog').style.display = 'flex';
+        }
+
+        function changeUsername() {
+            const newUsername = document.querySelector('.username-dialog input').value;
+            if (newUsername) {
+                localStorage.setItem('username', newUsername);
+                alert(`Username changed to ${newUsername}`);
+            }
+            document.querySelector('.username-dialog').style.display = 'none';
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            createTab('./tabs/newtab.html');
+        }, { once: true });
+    </script>
+</head>
+<body>
+    <nav>
+        <div class="button-container">
+            <button onclick="refreshActiveTab()">🔄</button>
+            <button onclick="toggleZoomMenu()">🔍</button>
+            <button onclick="showUsernameDialog()">👤</button>
+        </div>
+        <span class="separation" id="tabsplit1">|</span>
+        <div class="tabs"> </div>
+        <button class="create-tab" onclick="createTab('./tabs/newtab.html')">+</button>
+    </nav>
+    <main>
+    </main>
+    <div class="zoom-menu">
+        <button onclick="setZoom(0.75)">75%</button>
+        <button onclick="setZoom(1)">100%</button>
+        <button onclick="setZoom(1.25)">125%</button>
+        <button onclick="setZoom(1.5)">150%</button>
+    </div>
+    <div class="username-dialog">
+        <h3>Change Username</h3>
+        <input type="text" placeholder="Enter a new username"/>
+        <button onclick="changeUsername()">Save</button>
+        <input type="checkbox" name="Hide on the RPC?" id="hideUsernameRPC_settingun">
+    </div>
+</body>
+</html>
